@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  TextInput,
   Dimensions
 } from "react-native";
 
@@ -12,10 +13,12 @@ const { width, height } = Dimensions.get("window");
 class Todo extends Component {
   state = {
     isEditing: false,
-    isCompleted: false
+    isCompleted: false,
+    todoValue: ""
   };
   render() {
-    const { isCompleted, isEditing } = this.state;
+    const { isCompleted, isEditing, todoValue } = this.state;
+    const { text } = this.props;
     return (
       <View style={styles.container}>
         <View style={styles.column}>
@@ -27,14 +30,29 @@ class Todo extends Component {
               ]}
             />
           </TouchableOpacity>
-          <Text
-            style={[
-              styles.text,
-              isCompleted ? styles.completedText : styles.uncompletedText
-            ]}
-          >
-            I am Todo
-          </Text>
+          {isEditing ? (
+            <TextInput
+              style={[
+                styles.text,
+                styles.input,
+                isCompleted ? styles.completedText : styles.uncompletedText
+              ]}
+              value={todoValue}
+              multiline={true}
+              onChangeText={this.controllInput}
+              returnKeyType={"done"}
+              onBlur={this.finishEditing}
+            />
+          ) : (
+            <Text
+              style={[
+                styles.text,
+                isCompleted ? styles.completedText : styles.uncompletedText
+              ]}
+            >
+              {text}
+            </Text>
+          )}
         </View>
         {isEditing ? (
           <View style={styles.actions}>
@@ -69,15 +87,22 @@ class Todo extends Component {
     });
   };
   startEditing = () => {
-      this.setState({
-          isEditing: true
-      })
-  }
+    const { text } = this.props;
+    this.setState({
+      isEditing: true,
+      todoValue: text
+    });
+  };
   finishEditing = () => {
-      this.setState({
-          isEditing: false
-      })
-  }
+    this.setState({
+      isEditing: false
+    });
+  };
+  controllInput = text => {
+    this.setState({
+      todoValue: text
+    });
+  };
 }
 const styles = StyleSheet.create({
   container: {
@@ -121,13 +146,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   actions: {
-      flexDirection: "row",
+    flexDirection: "row"
   },
   actionContainer: {
-      marginVertical: 10,
-      marginHorizontal: 10,
+    marginVertical: 10,
+    marginHorizontal: 10
   },
-  actionText: {}
+  actionText: {},
+  input: {
+    marginVertical: 15,
+    paddingBottom: 5,
+    width: width / 2
+  }
 });
 
 export default Todo;
