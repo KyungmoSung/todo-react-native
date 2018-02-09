@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   StyleSheet,
   Text,
@@ -8,17 +8,27 @@ import {
   Dimensions,
   Platform,
   ScrollView
-} from 'react-native';
+} from "react-native";
+import { AppLoading } from "expo";
 import Todo from "./Todo";
+import uuidv1 from "uuid/v1";
 
 const { height, width } = Dimensions.get("window");
 
 export default class App extends React.Component {
   state = {
-    newToDo: ""
+    newToDo: "",
+    loadedTodos: false
   };
+  componentDidMount() {
+    this.loadTodos();
+  }
+
   render() {
-    const { newTodo } = this.state;
+    const { newToDo, loadedTodos } = this.state;
+    if (!loadedTodos) {
+      return <AppLoading />;
+    }
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
@@ -27,14 +37,15 @@ export default class App extends React.Component {
           <TextInput
             style={styles.input}
             placeholder={"New To Do"}
-            value={newTodo}
+            value={newToDo}
             onChangeText={this.controlNewToDo}
             placeholderTextColor={"#ccc"}
             returnKeyType={"done"}
             autoCorrect={false}
+            onSubmitEditing={this.addTodo}
           />
           <ScrollView contentContainerStyle={styles.todo}>
-            <Todo/>
+            <Todo text={"todo title"} />
           </ScrollView>
         </View>
       </View>
@@ -44,6 +55,36 @@ export default class App extends React.Component {
     this.setState({
       newToDo: text
     });
+  };
+  loadTodos = () => {
+    this.setState({
+      loadedTodos: true
+    });
+  };
+  addTodo = () => {
+    const { newToDo } = this.state;
+    if (newToDo !== "") {
+      this.setState(prevState => {
+        const ID = uuidv1();
+        const newToDoObj = {
+          [ID]: {
+            id: ID,
+            isCompleted: false,
+            text: newToDo,
+            createAt: Date.now()
+          }
+        };
+        const newState = {
+          ...prevState,
+          newToDo: "",
+          toDos: {
+            ...prevState.toDos,
+            ...newToDoObj
+          }
+        };
+        return { ...newState };
+      });
+    }
   };
 }
 
